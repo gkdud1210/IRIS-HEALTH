@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --background: #080d1a;
+  --foreground: #e2e8f0;
+  --accent: #00c8b4;
+  --accent-dim: #00c8b433;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.06); opacity: 0.3; }
+}
+
+@keyframes scan-line {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px #00c8b433; }
+  50% { box-shadow: 0 0 50px #00c8b466; }
+}
+
+.iris-ring { animation: pulse-ring 2.5s ease-in-out infinite; }
+.fade-in { animation: fade-in 0.6s ease-out forwards; }
+.glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+
+.scan-box {
+  position: relative;
+  overflow: hidden;
+}
+.scan-box::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00c8b4, transparent);
+  animation: scan-line 1.8s linear infinite;
+}
+
+.score-bar {
+  transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
