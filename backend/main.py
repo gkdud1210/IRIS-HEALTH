@@ -10,9 +10,16 @@ from gemini_analyzer import analyze_with_gemini
 
 app = FastAPI(title="Iris Health API", version="1.0.0")
 
+import os
+
+ALLOWED_ORIGINS = os.environ.get(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

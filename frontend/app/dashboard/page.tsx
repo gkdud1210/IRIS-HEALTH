@@ -57,7 +57,8 @@ export default function DashboardPage() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:8000/api/history/guest");
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const res = await fetch(`${API}/api/history/guest`);
       if (!res.ok) throw new Error("불러오기 실패");
       const data = await res.json();
       setRecords(data);
@@ -74,7 +75,8 @@ export default function DashboardPage() {
 
   const deleteRecord = async (id: number) => {
     try {
-      await fetch(`http://localhost:8000/api/history/${id}`, { method: "DELETE" });
+      const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      await fetch(`${API}/api/history/${id}`, { method: "DELETE" });
       setRecords((prev) => prev.filter((r) => r.id !== id));
     } catch {
       setError("삭제 실패");

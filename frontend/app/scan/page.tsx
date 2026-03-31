@@ -221,7 +221,8 @@ export default function ScanPage() {
     try {
       const results: Record<string, unknown> = {};
       for (const eye of eyes) {
-        const res = await fetch("http://localhost:8000/api/scan", {
+        const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const res = await fetch(`${API}/api/scan`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ image: captures[eye].image, eye_side: eye, user_id: "guest" }),
