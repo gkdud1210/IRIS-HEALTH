@@ -1,0 +1,17 @@
+# Python
+backend/venv/
+backend/__pycache__/
+backend/*.pyc
+backend/iris_health.db
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# 환경변수
+.env
+.env.local
+*.env
+
+# macOS
+.DS_Store
