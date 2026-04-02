@@ -110,10 +110,16 @@ export default function IrisMapOverlay({ irisCrop, eyeSide, detectionMethod }: P
           </button>
           {detectionMethod && (
             <span className="text-xs px-2 py-0.5 rounded-full"
-              style={detectionMethod === "mediapipe"
-                ? { color: "#00c8b4", background: "rgba(0,200,180,0.12)" }
-                : { color: "#f59e0b", background: "rgba(245,158,11,0.12)" }}>
-              {detectionMethod === "mediapipe" ? "MediaPipe" : "HoughCircles"}
+              style={
+                detectionMethod === "mediapipe"
+                  ? { color: "#00c8b4", background: "rgba(0,200,180,0.12)" }
+                  : detectionMethod === "pupil"
+                  ? { color: "#a78bfa", background: "rgba(167,139,250,0.12)" }
+                  : { color: "#f59e0b", background: "rgba(245,158,11,0.12)" }
+              }>
+              {detectionMethod === "mediapipe" ? "MediaPipe ✓"
+                : detectionMethod === "pupil" ? "동공 검출 ✓"
+                : "HoughCircles"}
             </span>
           )}
         </div>

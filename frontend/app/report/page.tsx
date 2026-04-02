@@ -42,6 +42,9 @@ interface ScanResult {
   };
   ai_analysis: AiAnalysis;
   iris_crop: string;
+  iris_strip?: string;
+  pupil_center?: [number, number];
+  pupil_radius?: number;
   created_at: string;
 }
 
@@ -297,6 +300,20 @@ function SingleEyeResult({ result }: { result: ScanResult }) {
         </div>
       )}
 
+      {result.iris_strip && (
+        <div className="p-4 rounded-2xl border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
+          <p className="text-xs text-slate-400 uppercase tracking-widest mb-1">정규화된 홍채 (Iris Strip)</p>
+          <p className="text-xs text-slate-500 mb-3">Rubber Sheet Model — r∈[0,1], θ∈[0,2π]</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={result.iris_strip}
+            alt="Normalized iris strip"
+            className="w-full rounded-lg"
+            style={{ imageRendering: "pixelated" }}
+          />
+        </div>
+      )}
+
       <div className="p-5 rounded-2xl border border-white/10" style={{ background: "rgba(255,255,255,0.03)" }}>
         <AiSection ai={result.ai_analysis ?? {}} />
       </div>
@@ -370,6 +387,18 @@ function DualEyeResult({ left, right }: { left: ScanResult; right: ScanResult })
                 eyeSide={r.eye_side}
                 detectionMethod={r.detection_method}
               />
+              {r.iris_strip && (
+                <div className="mt-3">
+                  <p className="text-xs text-slate-500 mb-1">Iris Strip</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={r.iris_strip}
+                    alt="Iris strip"
+                    className="w-full rounded"
+                    style={{ imageRendering: "pixelated" }}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>

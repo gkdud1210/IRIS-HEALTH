@@ -1,7 +1,9 @@
+from __future__ import annotations
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from typing import Optional, List
 import traceback
 
 from database import ScanRecord, get_db
@@ -14,7 +16,7 @@ import os
 
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000"
+    "http://localhost:3000,http://localhost:5501"
 ).split(",")
 
 app.add_middleware(
@@ -44,6 +46,9 @@ class ScanResponse(BaseModel):
     details: dict
     ai_analysis: dict
     iris_crop: str
+    iris_strip: Optional[str] = None
+    pupil_center: Optional[List[int]] = None
+    pupil_radius: Optional[int] = None
     created_at: str
 
 
@@ -106,6 +111,9 @@ def scan_iris(req: ScanRequest, db: Session = Depends(get_db)):
         },
         ai_analysis=ai_result,
         iris_crop=cv_result["iris_crop"],
+        iris_strip=cv_result.get("iris_strip"),
+        pupil_center=cv_result.get("pupil_center"),
+        pupil_radius=cv_result.get("pupil_radius"),
         created_at=record.created_at.isoformat(),
     )
 
