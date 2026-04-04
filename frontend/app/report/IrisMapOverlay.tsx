@@ -27,7 +27,7 @@ function donutPath(cx: number, cy: number, r1: number, r2: number, a1: number, a
 
 // ── 데이터 ────────────────────────────────────────────────────────────────
 
-const CX = 100, CY = 100, IRIS_R = 68;
+const CX = 100, CY = 100, IRIS_R = 74; // pad = iris_radius * 1.35 → 100/1.35 ≈ 74
 
 // 동심원 존 (비율 × IRIS_R)
 const ZONES = [

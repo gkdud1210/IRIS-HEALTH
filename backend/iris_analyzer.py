@@ -353,11 +353,19 @@ def create_iris_visualization(
     cv2.putText(vis, label, (6, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.45,
                 (0, 220, 80), 1, cv2.LINE_AA)
 
-    # 홍채 영역 크롭
+    # 홍채 영역 크롭 — 항상 정사각형 (가장자리는 검정 패딩)
     pad = int(iris_radius * 1.35)
-    x1, y1 = max(0, ix - pad), max(0, iy - pad)
-    x2, y2 = min(w, ix + pad), min(h, iy + pad)
-    cropped = vis[y1:y2, x1:x2]
+    crop_size = 2 * pad
+    cropped = np.zeros((crop_size, crop_size, 3), dtype=np.uint8)
+    src_x1, src_y1 = ix - pad, iy - pad
+    src_x2, src_y2 = ix + pad, iy + pad
+    dst_x1 = max(0, -src_x1)
+    dst_y1 = max(0, -src_y1)
+    dst_x2 = crop_size - max(0, src_x2 - w)
+    dst_y2 = crop_size - max(0, src_y2 - h)
+    src_x1, src_y1 = max(0, src_x1), max(0, src_y1)
+    src_x2, src_y2 = min(w, src_x2), min(h, src_y2)
+    cropped[dst_y1:dst_y2, dst_x1:dst_x2] = vis[src_y1:src_y2, src_x1:src_x2]
 
     _, buf = cv2.imencode(".jpg", cropped, [cv2.IMWRITE_JPEG_QUALITY, 90])
     return "data:image/jpeg;base64," + base64.b64encode(buf).decode()
@@ -723,33 +731,54 @@ def _preprocess_image(img: np.ndarray) -> np.ndarray:
     return img
 
 
-def analyze(image_data: str, eye_side: str = "left") -> dict:
+def analyze(image_data: str, eye_side: str = "left", manual_iris=None) -> dict:
     img = decode_image(image_data)
     if img is None:
         raise ValueError("이미지 디코딩 실패")
+
+    orig_h, orig_w = img.shape[:2]
     img = _preprocess_image(img)
+    new_h, new_w = img.shape[:2]
+
+    # 수동 좌표를 리사이즈된 이미지 크기에 맞게 보정
+    if manual_iris and (orig_w != new_w or orig_h != new_h):
+        sx = new_w / orig_w
+        sy = new_h / orig_h
+        manual_iris = {
+            "cx": manual_iris["cx"] * sx,
+            "cy": manual_iris["cy"] * sy,
+            "radius": manual_iris["radius"] * sx,
+        }
 
     # ── Step 1: Pre-processing ─────────────────────────────────────────────
     preprocessed, enhanced_gray = preprocess_iris_image(img)
 
-    # ── Step 2: Segmentation (Daugman's IDO) ──────────────────────────────
-    detection_method = "daugman"
-    try:
-        pupil_center, pupil_radius = detect_pupil_daugman(enhanced_gray)
-        iris_center, iris_radius = detect_iris_outer_daugman(
-            enhanced_gray, pupil_center, pupil_radius
-        )
-        # 결과 유효성 검사
-        if (iris_radius < 10 or pupil_radius < 3
-                or iris_radius <= pupil_radius
-                or iris_radius > min(img.shape[:2]) // 2):
-            raise ValueError("IDO 검출 결과 비합리적")
-    except Exception:
-        # Fallback: MediaPipe → 동공 → HoughCircles
-        center, iris_radius, detection_method = detect_iris(img, eye_side)
-        pupil_center = center
-        pupil_radius = max(int(iris_radius * 0.28), 3)
-        iris_center = center
+    # ── Step 2: Segmentation ───────────────────────────────────────────────
+    if manual_iris:
+        cx = int(manual_iris.get("cx", img.shape[1] // 2))
+        cy = int(manual_iris.get("cy", img.shape[0] // 2))
+        radius = int(manual_iris.get("radius", min(img.shape[:2]) // 4))
+        iris_center = (cx, cy)
+        iris_radius = max(radius, 10)
+        pupil_center = (cx, cy)
+        pupil_radius = max(int(radius * 0.30), 3)
+        detection_method = "manual"
+    else:
+        detection_method = "daugman"
+        try:
+            pupil_center, pupil_radius = detect_pupil_daugman(enhanced_gray)
+            iris_center, iris_radius = detect_iris_outer_daugman(
+                enhanced_gray, pupil_center, pupil_radius
+            )
+            if (iris_radius < 10 or pupil_radius < 3
+                    or iris_radius <= pupil_radius
+                    or iris_radius > min(img.shape[:2]) // 2):
+                raise ValueError("IDO 검출 결과 비합리적")
+        except Exception:
+            center, iris_radius, detection_method = detect_iris(img, eye_side)
+            pupil_center = center
+            pupil_radius = max(int(iris_radius * 0.28), 3)
+            iris_center = center
 
     iris_detected = iris_radius > 15
 

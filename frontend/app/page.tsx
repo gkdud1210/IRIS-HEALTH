@@ -11,13 +11,21 @@ export default function Home() {
             IRIS HEALTH
           </span>
         </div>
-        <Link
-          href="/scan"
-          className="px-5 py-2 rounded-full text-sm font-medium transition-all"
-          style={{ background: "var(--accent)", color: "#080d1a" }}
-        >
-          지금 분석하기
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/login"
+            className="px-5 py-2 rounded-full text-sm font-medium border border-white/20 hover:border-white/40 transition-all"
+          >
+            로그인
+          </Link>
+          <Link
+            href="/signup"
+            className="px-5 py-2 rounded-full text-sm font-medium transition-all"
+            style={{ background: "var(--accent)", color: "#080d1a" }}
+          >
+            회원가입
+          </Link>
+        </div>
       </nav>
 
       {/* Hero */}
@@ -57,17 +65,17 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-              href="/scan"
+              href="/signup"
               className="px-8 py-4 rounded-full text-base font-semibold glow-pulse transition-all hover:scale-105"
               style={{ background: "var(--accent)", color: "#080d1a" }}
             >
-              홍채 분석 시작
+              무료로 시작하기
             </Link>
             <Link
-              href="/dashboard"
+              href="/login"
               className="px-8 py-4 rounded-full text-base font-medium border border-white/20 hover:border-white/40 transition-all"
             >
-              내 기록 보기
+              로그인
             </Link>
           </div>
         </div>

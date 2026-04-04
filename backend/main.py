@@ -5,14 +5,14 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from typing import Optional, List
 import traceback
+import hashlib
+import os
 
-from database import ScanRecord, get_db
+from database import User, ScanRecord, get_db
 from iris_analyzer import analyze
 from gemini_analyzer import analyze_with_gemini
 
 app = FastAPI(title="Iris Health API", version="1.0.0")
-
-import os
 
 ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS",
@@ -28,10 +28,43 @@ app.add_middleware(
 )
 
 
+def _hash_password(password: str) -> str:
+    salt = os.urandom(16).hex()
+    hashed = hashlib.sha256((salt + password).encode()).hexdigest()
+    return f"{salt}:{hashed}"
+
+
+def _verify_password(password: str, stored: str) -> bool:
+    try:
+        salt, hashed = stored.split(":", 1)
+        return hashlib.sha256((salt + password).encode()).hexdigest() == hashed
+    except Exception:
+        return False
+
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    name: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    user_id: int
+    name: str
+    email: str
+
+
 class ScanRequest(BaseModel):
     image: str
     eye_side: str = "left"
     user_id: str = "guest"
+    patient_info: Optional[dict] = None
+    manual_iris: Optional[dict] = None
 
 
 class ScanResponse(BaseModel):
@@ -57,11 +90,30 @@ def health():
     return {"status": "ok"}
 
 
+@app.post("/api/auth/signup", response_model=AuthResponse)
+def signup(req: SignupRequest, db: Session = Depends(get_db)):
+    if db.query(User).filter(User.email == req.email).first():
+        raise HTTPException(status_code=409, detail="이미 사용 중인 이메일입니다.")
+    user = User(email=req.email, name=req.name, password_hash=_hash_password(req.password))
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return AuthResponse(user_id=user.id, name=user.name, email=user.email)
+
+
+@app.post("/api/auth/login", response_model=AuthResponse)
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == req.email).first()
+    if not user or not _verify_password(req.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="이메일 또는 비밀번호가 올바르지 않습니다.")
+    return AuthResponse(user_id=user.id, name=user.name, email=user.email)
+
+
 @app.post("/api/scan", response_model=ScanResponse)
 def scan_iris(req: ScanRequest, db: Session = Depends(get_db)):
     # 1) OpenCV 기반 수치 분석
     try:
-        cv_result = analyze(req.image, req.eye_side)
+        cv_result = analyze(req.image, req.eye_side, req.manual_iris)
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=422, detail=f"이미지 분석 오류: {str(e)}")
@@ -89,6 +141,7 @@ def scan_iris(req: ScanRequest, db: Session = Depends(get_db)):
             "kinetic": cv_result["kinetic"],
             "iris_detected": cv_result["iris_detected"],
             "ai_analysis": ai_result,
+            "patient_info": req.patient_info or {},
         },
     )
     db.add(record)
