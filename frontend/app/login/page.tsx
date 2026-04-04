@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -23,7 +25,7 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "로그인 실패");
       localStorage.setItem("iris_user", JSON.stringify(data));
-      window.location.href = "/patient";
+      router.push("/patient");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "서버 오류가 발생했습니다.");
     } finally {

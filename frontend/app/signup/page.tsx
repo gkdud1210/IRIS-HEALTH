@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function SignupPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +37,7 @@ export default function SignupPage() {
       if (!res.ok) throw new Error(data.detail || "회원가입 실패");
       setSuccess(true);
       setTimeout(() => {
-        window.location.href = "/login";
+        router.push("/login");
       }, 2500);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "서버 오류가 발생했습니다.");
