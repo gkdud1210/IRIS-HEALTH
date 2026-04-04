@@ -12,7 +12,8 @@ from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
-client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+_api_key = os.environ.get("GEMINI_API_KEY", "")
+client = genai.Client(api_key=_api_key) if _api_key else None
 
 PROMPT = """
 당신은 홍채학(Iridology) 전문 AI 분석 시스템입니다.
@@ -46,6 +47,9 @@ def analyze_with_gemini(image_data: str) -> dict:
     홍채 이미지를 Gemini Vision으로 분석.
     image_data: Base64 data URL 또는 순수 Base64 문자열
     """
+    if client is None:
+        return {"overall_impression": "AI 분석 비활성화 (GEMINI_API_KEY 미설정)", "disclaimer": "본 분석은 참고용이며 의료 진단을 대체하지 않습니다."}
+
     # Base64 추출
     if "," in image_data:
         header, b64 = image_data.split(",", 1)
