@@ -67,6 +67,7 @@ export default function ScanPage() {
     setPatientInfo(JSON.parse(patientRaw));
   }, [router]);
 
+
   // ── 카메라 ─────────────────────────────────────────────────────────────
 
   // 카메라 목록 조회 (권한 허용 후)

@@ -13,6 +13,12 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-3">
           <Link
+            href="/demo"
+            className="px-5 py-2 rounded-full text-sm font-medium border border-white/20 hover:border-white/40 transition-all"
+          >
+            체험하기
+          </Link>
+          <Link
             href="/login"
             className="px-5 py-2 rounded-full text-sm font-medium border border-white/20 hover:border-white/40 transition-all"
           >
@@ -72,10 +78,10 @@ export default function Home() {
               무료로 시작하기
             </Link>
             <Link
-              href="/login"
+              href="/demo"
               className="px-8 py-4 rounded-full text-base font-medium border border-white/20 hover:border-white/40 transition-all"
             >
-              로그인
+              로그인 없이 체험하기 →
             </Link>
           </div>
         </div>

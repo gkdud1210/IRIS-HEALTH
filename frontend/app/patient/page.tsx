@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function PatientPage() {
   const router = useRouter();
   const [userName, setUserName] = useState("");
+  const [isGuest, setIsGuest] = useState(false);
 
   const [patientName, setPatientName] = useState("");
   const [age, setAge] = useState("");
@@ -23,11 +24,12 @@ export default function PatientPage() {
     }
     const user = JSON.parse(raw);
     setUserName(user.name);
+    setIsGuest(user.user_id === "guest");
   }, [router]);
 
   function handleLogout() {
     localStorage.removeItem("iris_user");
-    router.replace("/login");
+    router.replace(isGuest ? "/" : "/login");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -65,12 +67,18 @@ export default function PatientPage() {
           <span className="font-bold tracking-tight" style={{ color: "var(--accent)" }}>IRIS HEALTH</span>
         </a>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-400">{userName}</span>
+          {isGuest ? (
+            <span className="text-xs px-2.5 py-1 rounded-full border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>
+              체험 중
+            </span>
+          ) : (
+            <span className="text-sm text-slate-400">{userName}</span>
+          )}
           <button
             onClick={handleLogout}
             className="text-xs text-slate-500 hover:text-white transition-colors px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/30"
           >
-            로그아웃
+            {isGuest ? "홈으로" : "로그아웃"}
           </button>
         </div>
       </nav>
