@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface HistoryRecord {
@@ -49,16 +50,25 @@ function scoreColor(score: number) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [records, setRecords] = useState<HistoryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const fetchHistory = useCallback(async () => {
+  useEffect(() => {
+    const userRaw = localStorage.getItem("iris_user");
+    if (!userRaw) { router.replace("/login"); return; }
+    const user = JSON.parse(userRaw);
+    setUserId(String(user.user_id));
+  }, [router]);
+
+  const fetchHistory = useCallback(async (uid: string) => {
     setLoading(true);
     setError("");
     try {
       const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-      const res = await fetch(`${API}/api/history/guest`);
+      const res = await fetch(`${API}/api/history/${uid}`);
       if (!res.ok) throw new Error("불러오기 실패");
       const data = await res.json();
       setRecords(data);
@@ -70,8 +80,8 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+    if (userId) fetchHistory(userId);
+  }, [userId, fetchHistory]);
 
   const deleteRecord = async (id: number) => {
     try {

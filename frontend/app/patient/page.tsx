@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function PatientPage() {
   const router = useRouter();
@@ -62,10 +63,10 @@ export default function PatientPage() {
     <main className="min-h-screen flex flex-col" style={{ background: "var(--background)" }}>
       {/* 네비게이션 */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <span className="text-xl">👁️</span>
           <span className="font-bold tracking-tight" style={{ color: "var(--accent)" }}>IRIS HEALTH</span>
-        </a>
+        </Link>
         <div className="flex items-center gap-4">
           {isGuest ? (
             <span className="text-xs px-2.5 py-1 rounded-full border" style={{ borderColor: "var(--accent)", color: "var(--accent)" }}>

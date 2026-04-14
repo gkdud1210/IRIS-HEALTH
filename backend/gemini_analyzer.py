@@ -61,7 +61,7 @@ def analyze_with_gemini(image_data: str) -> dict:
         mime = "image/jpeg"
 
     response = client.messages.create(
-        model="claude-opus-4-5",
+        model="claude-haiku-4-5-20251001",
         max_tokens=1024,
         messages=[
             {

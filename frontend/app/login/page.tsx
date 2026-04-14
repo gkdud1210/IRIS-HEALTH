@@ -37,12 +37,12 @@ export default function LoginPage() {
     <main className="min-h-screen flex flex-col items-center justify-center px-4" style={{ background: "var(--background)" }}>
       <div className="w-full max-w-sm">
         {/* 로고 */}
-        <a href="/" className="flex items-center justify-center gap-2 mb-10 hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center justify-center gap-2 mb-10 hover:opacity-80 transition-opacity">
           <span className="text-3xl">👁️</span>
           <span className="font-bold text-xl tracking-tight" style={{ color: "var(--accent)" }}>
             IRIS HEALTH
           </span>
-        </a>
+        </Link>
 
         <div className="rounded-2xl border border-white/10 p-8" style={{ background: "rgba(255,255,255,0.03)" }}>
           <h1 className="text-xl font-bold mb-6 text-center">로그인</h1>
